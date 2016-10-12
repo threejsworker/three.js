@@ -15,6 +15,7 @@ THREE.VREffect = function ( renderer, onError ) {
 	var eyeTranslationL = new THREE.Vector3();
 	var eyeTranslationR = new THREE.Vector3();
 	var renderRectL, renderRectR;
+	var eyeCallback = null;
 
 	var frameData = null;
 
@@ -225,6 +226,12 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	this.autoSubmitFrame = true;
 
+	this.setEyeCallback = function ( f ) {
+
+		eyeCallback = f;
+
+	}
+
 	// render
 
 	var cameraL = new THREE.PerspectiveCamera();
@@ -345,6 +352,13 @@ THREE.VREffect = function ( renderer, onError ) {
 				renderer.setScissor( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
 
 			}
+
+			if ( eyeCallback ) {
+
+				eyeCallback(cameraL);
+
+			}
+
 			renderer.render( scene, cameraL, renderTarget, forceClear );
 
 			// render right eye
@@ -359,6 +373,13 @@ THREE.VREffect = function ( renderer, onError ) {
 				renderer.setScissor( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
 
 			}
+
+			if ( eyeCallback ) {
+
+				eyeCallback(cameraR);
+
+			}
+
 			renderer.render( scene, cameraR, renderTarget, forceClear );
 
 			if ( renderTarget ) {
@@ -392,6 +413,12 @@ THREE.VREffect = function ( renderer, onError ) {
 		}
 
 		// Regular render mode if not HMD
+
+		if ( eyeCallback ) {
+
+			eyeCallback(camera);
+
+		}
 
 		renderer.render( scene, camera, renderTarget, forceClear );
 
