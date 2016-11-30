@@ -62,7 +62,7 @@ Audio.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 	},
 
-	play: function () {
+	play: function ( when, offset, duration ) {
 
 		if ( this.isPlaying === true ) {
 
@@ -78,13 +78,16 @@ Audio.prototype = Object.assign( Object.create( Object3D.prototype ), {
 
 		}
 
+		when = when !== undefined ? when : 0;
+		this.startTime = offset !== undefined ? offset : this.startTime;
+
 		var source = this.context.createBufferSource();
 
 		source.buffer = this.buffer;
 		source.loop = this.loop;
 		source.onended = this.onEnded.bind( this );
 		source.playbackRate.setValueAtTime( this.playbackRate, this.startTime );
-		source.start( 0, this.startTime );
+		source.start( when, this.startTime, duration );
 
 		this.isPlaying = true;
 
