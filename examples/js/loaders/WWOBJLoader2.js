@@ -6,7 +6,7 @@
 'use strict';
 
 if ( THREE.OBJLoader2 === undefined ) { THREE.OBJLoader2 = {} }
-THREE.OBJLoader2.version = '1.0.1';
+THREE.OBJLoader2.version = '1.0.2';
 
 /**
  * OBJ data will be loaded by dynamically created web worker.
@@ -640,7 +640,7 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 				 * @param absoluteNormalCount
 				 * @param absoluteUvCount
 				 */
-				MeshCreator.prototype.buildMesh = function ( rawObjectDescriptions, inputObjectCount, absoluteVertexCount, absoluteNormalCount, absoluteUvCount ) {
+				MeshCreator.prototype._buildMesh = function ( rawObjectDescriptions, inputObjectCount, absoluteVertexCount, absoluteNormalCount, absoluteUvCount ) {
 					if ( this.debug ) console.log( 'OBJLoader.buildMesh:\nInput object no.: ' + inputObjectCount );
 
 					var vertexFa = new Float32Array( absoluteVertexCount );
