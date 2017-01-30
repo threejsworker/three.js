@@ -6,7 +6,7 @@
 'use strict';
 
 if ( THREE.OBJLoader2 === undefined ) { THREE.OBJLoader2 = {} }
-THREE.OBJLoader2.version = '1.0.2';
+THREE.OBJLoader2.version = '1.0.3';
 
 /**
  * Use this class to load OBJ data from files or to parse OBJ data from arraybuffer or text

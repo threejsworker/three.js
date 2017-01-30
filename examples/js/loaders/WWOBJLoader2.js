@@ -6,7 +6,7 @@
 'use strict';
 
 if ( THREE.OBJLoader2 === undefined ) { THREE.OBJLoader2 = {} }
-THREE.OBJLoader2.version = '1.0.2';
+THREE.OBJLoader2.version = '1.0.3';
 
 /**
  * OBJ data will be loaded by dynamically created web worker.
@@ -815,10 +815,7 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 
 			var buildSingelton = function ( fullName, internalName, object ) {
 				var objectString = fullName + ' = (function () {\n\n';
-
-				var constructorString = object.prototype.constructor.toString();
-				constructorString = constructorString.replace( /function\s[a-z]/g, 'function ' + internalName );
-				objectString += '\t' + constructorString + '\n\n';
+				objectString += '\t' + object.prototype.constructor.toString() + '\n\n';
 
 				var funcString;
 				var objectPart;
@@ -828,7 +825,6 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 					if ( typeof objectPart === 'function' ) {
 
 						funcString = objectPart.toString();
-						funcString = funcString.replace( /new\s[a-z]/g, 'new ' + internalName );
 						objectString += '\t' + internalName + '.prototype.' + name + ' = ' + funcString + ';\n\n';
 
 					}
