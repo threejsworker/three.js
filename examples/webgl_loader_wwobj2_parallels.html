@@ -114,6 +114,7 @@
 					this.cameraTarget = this.cameraDefaults.posCameraTarget;
 
 					this.wwDirector = new THREE.OBJLoader2.WWOBJLoader2Director();
+					this.wwDirector.setCrossOrigin( 'anonymous' );
 
 					this.controls = null;
 					this.cube = null;
@@ -260,8 +261,9 @@
 					models.push( {
 						modelName: 'cerberus',
 						dataAvailable: false,
-						pathObj: 'models/obj/Cerberus/',
-						fileObj: 'Cerberus.obj'
+						pathObj: 'models/obj/cerberus/',
+						fileObj: 'Cerberus.obj',
+						scale: 50.0
 					} );
 					models.push( {
 						modelName:'WaltHead',
