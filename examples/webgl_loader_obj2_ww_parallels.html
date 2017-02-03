@@ -91,10 +91,7 @@
 
 			'use strict';
 
-			if ( THREE.examples === undefined ) THREE.examples = {};
-			if ( THREE.examples.loaders === undefined ) THREE.examples.loaders = {};
-
-			THREE.examples.loaders.WWParallels = (function () {
+			var WWParallels = (function () {
 
 				function WWParallels( elementToBindTo ) {
 					this.renderer = null;
@@ -355,7 +352,7 @@
 			})();
 
 
-			var app = new THREE.examples.loaders.WWParallels( document.getElementById( 'example' ) );
+			var app = new WWParallels( document.getElementById( 'example' ) );
 
 			var WWControl = function() {
 				this.queueLength = 128;
