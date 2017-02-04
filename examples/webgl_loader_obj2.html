@@ -99,9 +99,9 @@
 
 			'use strict';
 
-			var OBJLoader2Verify = (function () {
+			var OBJLoader2Example = (function () {
 
-				function OBJLoader2Verify( elementToBindTo ) {
+				function OBJLoader2Example( elementToBindTo ) {
 					this.renderer = null;
 					this.canvas = elementToBindTo;
 					this.aspectRatio = 1;
@@ -134,7 +134,7 @@
 					};
 				}
 
-				OBJLoader2Verify.prototype.initGL = function () {
+				OBJLoader2Example.prototype.initGL = function () {
 					this.renderer = new THREE.WebGLRenderer( {
 						canvas: this.canvas,
 						antialias: true,
@@ -170,7 +170,7 @@
 					this.scene.add( this.pivot );
 				};
 
-				OBJLoader2Verify.prototype.initPostGL = function () {
+				OBJLoader2Example.prototype.initPostGL = function () {
 					var scope = this;
 
 					var mtlLoader = new THREE.MTLLoader();
@@ -211,7 +211,7 @@
 					return true;
 				};
 
-				OBJLoader2Verify.prototype.resizeDisplayGL = function () {
+				OBJLoader2Example.prototype.resizeDisplayGL = function () {
 					this.controls.handleResize();
 
 					this.recalcAspectRatio();
@@ -220,24 +220,24 @@
 					this.updateCamera();
 				};
 
-				OBJLoader2Verify.prototype.recalcAspectRatio = function () {
+				OBJLoader2Example.prototype.recalcAspectRatio = function () {
 					this.aspectRatio = ( this.canvas.offsetHeight === 0 ) ? 1 : this.canvas.offsetWidth / this.canvas.offsetHeight;
 				};
 
-				OBJLoader2Verify.prototype.resetCamera = function () {
+				OBJLoader2Example.prototype.resetCamera = function () {
 					this.camera.position.copy( this.cameraDefaults.posCamera );
 					this.cameraTarget.copy( this.cameraDefaults.posCameraTarget );
 
 					this.updateCamera();
 				};
 
-				OBJLoader2Verify.prototype.updateCamera = function () {
+				OBJLoader2Example.prototype.updateCamera = function () {
 					this.camera.aspect = this.aspectRatio;
 					this.camera.lookAt( this.cameraTarget );
 					this.camera.updateProjectionMatrix();
 				};
 
-				OBJLoader2Verify.prototype.render = function () {
+				OBJLoader2Example.prototype.render = function () {
 					if ( ! this.renderer.autoClear ) this.renderer.clear();
 
 					this.controls.update();
@@ -248,7 +248,7 @@
 					this.renderer.render( this.scene, this.camera );
 				};
 
-				OBJLoader2Verify.prototype.alterSmoothShading = function () {
+				OBJLoader2Example.prototype.alterSmoothShading = function () {
 
 					var scope = this;
 					scope.smoothShading = ! scope.smoothShading;
@@ -269,7 +269,7 @@
 					scope.pivot.traverse( scopeTraverse );
 				};
 
-				OBJLoader2Verify.prototype.alterDouble = function () {
+				OBJLoader2Example.prototype.alterDouble = function () {
 
 					var scope = this;
 					scope.doubleSide = ! scope.doubleSide;
@@ -290,13 +290,13 @@
 					scope.pivot.traverse( scopeTraverse );
 				};
 
-				OBJLoader2Verify.prototype.traverseScene = function ( object3d ) {
+				OBJLoader2Example.prototype.traverseScene = function ( object3d ) {
 
 					if ( object3d.material instanceof THREE.MultiMaterial ) {
 
 						for ( var matName in object3d.material.materials ) {
 
-							this.traversalFunction( object3d.material.materials[matName] );
+							this.traversalFunction( object3d.material.materials[ matName ] );
 
 						}
 
@@ -308,24 +308,24 @@
 
 				};
 
-				return OBJLoader2Verify;
+				return OBJLoader2Example;
 
 			})();
 
-			var app = new OBJLoader2Verify( document.getElementById( 'example' ) );
+			var app = new OBJLoader2Example( document.getElementById( 'example' ) );
 
 			var resizeWindow = function () {
 				app.resizeDisplayGL();
 			};
 
 			var render = function () {
-				requestAnimationFrame(render);
+				requestAnimationFrame( render );
 				app.render();
 			};
 
-			window.addEventListener('resize', resizeWindow, false);
+			window.addEventListener( 'resize', resizeWindow, false );
 
-			console.log("Starting initialisation phase...");
+			console.log( 'Starting initialisation phase...' );
 			app.initGL();
 			app.resizeDisplayGL();
 			app.initPostGL();

@@ -100,9 +100,9 @@
 
 			'use strict';
 
-			var WWOBJLoader2Verify = (function () {
+			var WWOBJLoader2Example = (function () {
 
-				function WWOBJLoader2Verify( elementToBindTo ) {
+				function WWOBJLoader2Example( elementToBindTo ) {
 					this.renderer = null;
 					this.canvas = elementToBindTo;
 					this.aspectRatio = 1;
@@ -135,7 +135,7 @@
 					};
 				}
 
-				WWOBJLoader2Verify.prototype.initGL = function () {
+				WWOBJLoader2Example.prototype.initGL = function () {
 					this.renderer = new THREE.WebGLRenderer( {
 						canvas: this.canvas,
 						antialias: true,
@@ -171,7 +171,7 @@
 					this.scene.add( this.pivot );
 				};
 
-				WWOBJLoader2Verify.prototype.initPostGL = function () {
+				WWOBJLoader2Example.prototype.initPostGL = function () {
 					var wwObjLoader2 = new THREE.OBJLoader2.WWOBJLoader2();
 					wwObjLoader2.setCrossOrigin( 'anonymous' );
 
@@ -202,7 +202,7 @@
 					return true;
 				};
 
-				WWOBJLoader2Verify.prototype.resizeDisplayGL = function () {
+				WWOBJLoader2Example.prototype.resizeDisplayGL = function () {
 					this.controls.handleResize();
 
 					this.recalcAspectRatio();
@@ -211,24 +211,24 @@
 					this.updateCamera();
 				};
 
-				WWOBJLoader2Verify.prototype.recalcAspectRatio = function () {
+				WWOBJLoader2Example.prototype.recalcAspectRatio = function () {
 					this.aspectRatio = ( this.canvas.offsetHeight === 0 ) ? 1 : this.canvas.offsetWidth / this.canvas.offsetHeight;
 				};
 
-				WWOBJLoader2Verify.prototype.resetCamera = function () {
+				WWOBJLoader2Example.prototype.resetCamera = function () {
 					this.camera.position.copy( this.cameraDefaults.posCamera );
 					this.cameraTarget.copy( this.cameraDefaults.posCameraTarget );
 
 					this.updateCamera();
 				};
 
-				WWOBJLoader2Verify.prototype.updateCamera = function () {
+				WWOBJLoader2Example.prototype.updateCamera = function () {
 					this.camera.aspect = this.aspectRatio;
 					this.camera.lookAt( this.cameraTarget );
 					this.camera.updateProjectionMatrix();
 				};
 
-				WWOBJLoader2Verify.prototype.render = function () {
+				WWOBJLoader2Example.prototype.render = function () {
 					if ( ! this.renderer.autoClear ) this.renderer.clear();
 
 					this.controls.update();
@@ -239,7 +239,7 @@
 					this.renderer.render( this.scene, this.camera );
 				};
 
-				WWOBJLoader2Verify.prototype.alterSmoothShading = function () {
+				WWOBJLoader2Example.prototype.alterSmoothShading = function () {
 
 					var scope = this;
 					scope.smoothShading = ! scope.smoothShading;
@@ -260,7 +260,7 @@
 					scope.pivot.traverse( scopeTraverse );
 				};
 
-				WWOBJLoader2Verify.prototype.alterDouble = function () {
+				WWOBJLoader2Example.prototype.alterDouble = function () {
 
 					var scope = this;
 					scope.doubleSide = ! scope.doubleSide;
@@ -281,13 +281,13 @@
 					scope.pivot.traverse( scopeTraverse );
 				};
 
-				WWOBJLoader2Verify.prototype.traverseScene = function ( object3d ) {
+				WWOBJLoader2Example.prototype.traverseScene = function ( object3d ) {
 
 					if ( object3d.material instanceof THREE.MultiMaterial ) {
 
 						for ( var matName in object3d.material.materials ) {
 
-							this.traversalFunction( object3d.material.materials[matName] );
+							this.traversalFunction( object3d.material.materials[ matName ] );
 
 						}
 
@@ -299,25 +299,25 @@
 
 				};
 
-				return WWOBJLoader2Verify;
+				return WWOBJLoader2Example;
 
 			})();
 
 
-			var app = new WWOBJLoader2Verify( document.getElementById( 'example' ) );
+			var app = new WWOBJLoader2Example( document.getElementById( 'example' ) );
 
 			var resizeWindow = function () {
 				app.resizeDisplayGL();
 			};
 
 			var render = function () {
-				requestAnimationFrame(render);
+				requestAnimationFrame( render) ;
 				app.render();
 			};
 
-			window.addEventListener('resize', resizeWindow, false);
+			window.addEventListener( 'resize', resizeWindow, false );
 
-			console.log("Starting initialisation phase...");
+			console.log( 'Starting initialisation phase...' );
 			app.initGL();
 			app.resizeDisplayGL();
 			app.initPostGL();
