@@ -7,44 +7,44 @@
 
 		<style>
 			body {
-				font-family: Monospace;
-				background-color: #000;
-				color: #fff;
-				margin: 0px 0px 0px 0px;
-				padding: 0px 0px 0px 0px;
-				border: none;
-				cursor: default;
+			    font-family: Monospace;
+			    background-color: #000;
+			    color: #fff;
+			    margin: 0px 0px 0px 0px;
+			    padding: 0px 0px 0px 0px;
+			    border: none;
+			    cursor: default;
 			}
 			#info {
-				color: #fff;
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				z-index: 100;
-				display:block;
+			    color: #fff;
+			    position: absolute;
+			    top: 10px;
+			    width: 100%;
+			    text-align: center;
+			    z-index: 100;
+			    display:block;
 			}
 			#info a {
-				color: #f00;
-				font-weight: bold;
-				text-decoration: underline;
-				cursor: pointer
+			    color: #f00;
+			    font-weight: bold;
+			    text-decoration: underline;
+			    cursor: pointer
 			}
 			#glFullscreen {
-				width: 100%;
-				height: 100vh;
-				min-width: 640px;
-				min-height: 360px;
-				position: relative;
-				overflow: hidden;
-				z-index: 0;
+			    width: 100%;
+			    height: 100vh;
+			    min-width: 640px;
+			    min-height: 360px;
+			    position: relative;
+			    overflow: hidden;
+			    z-index: 0;
 			}
 			#example {
-				width: 100%;
-				height: 100%;
-				top: 0px;
-				left: 0px;
-				background-color: #000000;
+			    width: 100%;
+			    height: 100%;
+			    top: 0px;
+			    left: 0px;
+			    background-color: #000000;
 			}
 			#feedback {
 				color: darkorange;
@@ -56,14 +56,13 @@
 				padding: 0px 0px 4px 4px;
 			}
 			#dat {
-				user-select: none;
-				position: absolute;
-				left: 0px;
-				top: 0px;
-				color: darkorange;
-				z-Index: 2;
+			    user-select: none;
+			    position: absolute;
+			    left: 0px;
+			    top: 0px;
+			    z-Index: 2;
 			}
-		</style>
+    	</style>
 	</head>
 
 	<body>
@@ -192,7 +191,7 @@
 					document.getElementById( 'feedback' ).innerHTML = text;
 				};
 
-				WWParallels.prototype.enqueueAllAssests = function ( maxQueueSize, maxWebWorkers ) {
+				WWParallels.prototype.enqueueAllAssests = function ( maxQueueSize, maxWebWorkers, streamMeshes ) {
 					var scope = this;
 					scope.wwDirector.objectsCompleted = 0;
 					scope.feedbackArray = new Array( maxWebWorkers );
@@ -295,7 +294,7 @@
 						model.sceneGraphBaseNode = pivot;
 
 						runParams = new THREE.OBJLoader2.WWOBJLoader2.PrepDataFile(
-							model.modelName, model.pathObj, model.fileObj, model.pathTexture, model.fileMtl, model.sceneGraphBaseNode
+							model.modelName, model.pathObj, model.fileObj, model.pathTexture, model.fileMtl, model.sceneGraphBaseNode, streamMeshes
 						);
 						this.wwDirector.enqueueForRun( runParams );
 						this.allAssets.push( runParams );
@@ -351,13 +350,15 @@
 
 			})();
 
-
 			var app = new WWParallels( document.getElementById( 'example' ) );
 
-			var WWControl = function() {
+			var WWParallelsControl = function() {
 				this.queueLength = 128;
 				this.workerCount = 4;
-				this.run = null;
+				this.streamMeshes = true;
+				this.run = function () {
+					app.enqueueAllAssests( this.queueLength, this.workerCount, this.streamMeshes );
+				};
 				this.terminate = function () {
 					app.terminateManager();
 				};
@@ -366,11 +367,7 @@
 					app.clearAllAssests();
 				};
 			};
-
-			var wwControl = new WWControl();
-			wwControl.run = function () {
-				app.enqueueAllAssests( wwControl.queueLength, wwControl.workerCount );
-			};
+			var wwParallelsControl = new WWParallelsControl();
 
 			var gui = new dat.GUI( {
 				autoPlace: false,
@@ -380,14 +377,15 @@
 			var menuDiv = document.getElementById( 'dat' );
 			menuDiv.appendChild(gui.domElement);
 			var folderQueue = gui.addFolder( 'Web Worker Director Queue Control' );
-			folderQueue.add( wwControl, 'queueLength' ).min( 1 ).max( 1024 ).step( 1 );
-			folderQueue.add( wwControl, 'workerCount' ).min( 1 ).max( 16 ).step( 1 );
-			folderQueue.add( wwControl, 'run' ).name( 'Run Queue' );
+			folderQueue.add( wwParallelsControl, 'queueLength' ).min( 1 ).max( 1024 ).step( 1 );
+			folderQueue.add( wwParallelsControl, 'workerCount' ).min( 1 ).max( 16 ).step( 1 );
+			folderQueue.add( wwParallelsControl, 'streamMeshes' );
+			folderQueue.add( wwParallelsControl, 'run' ).name( 'Run Queue' );
 			folderQueue.open();
 
 			var folderWWControl = gui.addFolder( 'Resource Management' );
-			folderWWControl.add( wwControl, 'terminate' ).name( 'Terminate WWManager' );
-			folderWWControl.add( wwControl, 'clearAllAssests' ).name( 'Clear Scene' );
+			folderWWControl.add( wwParallelsControl, 'terminate' ).name( 'Terminate WWManager' );
+			folderWWControl.add( wwParallelsControl, 'clearAllAssests' ).name( 'Clear Scene' );
 
 			var resizeWindow = function () {
 				app.resizeDisplayGL();

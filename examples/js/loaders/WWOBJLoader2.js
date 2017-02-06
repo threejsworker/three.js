@@ -6,7 +6,7 @@
 'use strict';
 
 if ( THREE.OBJLoader2 === undefined ) { THREE.OBJLoader2 = {} }
-THREE.OBJLoader2.version = '1.0.4';
+THREE.OBJLoader2.version = '1.0.5';
 
 /**
  * OBJ data will be loaded by dynamically created web worker.
@@ -32,6 +32,8 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 		this.debug = false;
 
 		this.sceneGraphBaseNode = null;
+		this.streamMeshes = true;
+		this.meshStore = null;
 		this.modelName = 'none';
 		this.validated = false;
 		this.running = false;
@@ -164,6 +166,8 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 		}
 
 		this.sceneGraphBaseNode = null;
+		this.streamMeshes = true;
+		this.meshStore = [];
 		this.modelName = 'none';
 		this.validated = true;
 		this.running = true;
@@ -204,7 +208,7 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 		if ( this.dataAvailable ) {
 
 			// fast-fail on bad type
-			if ( ! ( params.objAsArrayBuffer instanceof ArrayBuffer || params.objAsArrayBuffer instanceof Uint8Array ) ) {
+			if ( ! params.objAsArrayBuffer instanceof Uint8Array ) {
 				throw 'Provided input is not of type arraybuffer! Aborting...';
 			}
 
@@ -236,6 +240,8 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 		this.setRequestTerminate( params.requestTerminate );
 		this.pathTexture = params.pathTexture;
 		this.sceneGraphBaseNode = params.sceneGraphBaseNode;
+		this.streamMeshes = params.streamMeshes;
+		if ( ! this.streamMeshes ) this.meshStore = [];
 	};
 
 	/**
@@ -327,6 +333,8 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 			console.timeEnd( 'Loading MTL textures' );
 		};
 
+
+		this.mtlLoader.setPath( this.pathTexture );
 		if ( this.dataAvailable ) {
 
 			processLoadedMaterials( ( this.mtlAsString != null ) ? this.mtlLoader.parse( this.mtlAsString ) : null );
@@ -339,7 +347,6 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 
 			} else {
 
-				this.mtlLoader.setPath( this.pathTexture );
 				this.mtlLoader.load( this.fileMtl, processLoadedMaterials );
 
 			}
@@ -431,13 +438,30 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 				}
 				var mesh = new THREE.Mesh( bufferGeometry, material );
 				mesh.name = payload.meshName;
-				this.sceneGraphBaseNode.add( mesh );
+				if ( this.streamMeshes ) {
 
+					this.sceneGraphBaseNode.add( mesh );
+
+				} else {
+
+					this.meshStore.push( mesh );
+
+				}
 				var output = '(' + this.counter + '): ' + payload.meshName;
 				this._announceProgress( 'Adding mesh', output );
 				break;
 
 			case 'complete':
+
+				if ( ! this.streamMeshes ) {
+
+					for ( var key in this.meshStore ) {
+
+						this.sceneGraphBaseNode.add( this.meshStore[ key ] );
+
+					}
+
+				}
 
 				console.timeEnd( 'WWOBJLoader2' );
 				if ( payload.msg != null ) {
@@ -663,7 +687,7 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
 					var materialDescription;
 					var materialDescriptions = [];
 
-					var createMultiMaterial = ( rawObjectDescriptions.length > 1 ) ? true : false;
+					var createMultiMaterial = ( rawObjectDescriptions.length > 1 );
 					var materialIndex = 0;
 					var materialIndexMapping = [];
 					var selectedMaterialIndex;
@@ -882,12 +906,13 @@ THREE.OBJLoader2.WWOBJLoader2 = (function () {
  * @param {string} pathTexture Path to texture files
  * @param {string} mtlAsString MTL file content as string
  * @param {THREE.Object3D} sceneGraphBaseNode {@link THREE.Object3D} where meshes will be attached
+ * @param {boolean} streamMeshes=true Singles meshes are directly integrated into scene when loaded or later
  * @param {boolean} [requestTerminate=false] Request termination of web worker and free local resources after execution
  *
- * @returns {{modelName: string, dataAvailable: boolean, objAsArrayBuffer: null, pathTexture: null, mtlAsString: null, sceneGraphBaseNode: null, requestTerminate: boolean}}
+ * @returns {{modelName: string, dataAvailable: boolean, objAsArrayBuffer: null, pathTexture: null, mtlAsString: null, sceneGraphBaseNode: null, streamMeshes: boolean, requestTerminate: boolean}}
  * @constructor
  */
-THREE.OBJLoader2.WWOBJLoader2.PrepDataArrayBuffer = function ( modelName, objAsArrayBuffer, pathTexture, mtlAsString, sceneGraphBaseNode, requestTerminate ) {
+THREE.OBJLoader2.WWOBJLoader2.PrepDataArrayBuffer = function ( modelName, objAsArrayBuffer, pathTexture, mtlAsString, sceneGraphBaseNode, streamMeshes, requestTerminate ) {
 
 	var data = {
 		modelName: ( modelName == null ) ? 'none' : modelName,
@@ -896,6 +921,7 @@ THREE.OBJLoader2.WWOBJLoader2.PrepDataArrayBuffer = function ( modelName, objAsA
 		pathTexture: ( pathTexture == null ) ? null : pathTexture,
 		mtlAsString: ( mtlAsString == null ) ? null : mtlAsString,
 		sceneGraphBaseNode: ( sceneGraphBaseNode == null ) ? null : sceneGraphBaseNode,
+		streamMeshes: ( streamMeshes == null ) ? true : streamMeshes,
 		requestTerminate: ( requestTerminate == null ) ? false : requestTerminate
 	};
 
@@ -911,12 +937,13 @@ THREE.OBJLoader2.WWOBJLoader2.PrepDataArrayBuffer = function ( modelName, objAsA
  * @param {string} pathTexture Path to texture files
  * @param {string} fileMtl MTL file name
  * @param {THREE.Object3D} sceneGraphBaseNode {@link THREE.Object3D} where meshes will be attached
+ * @param {boolean} streamMeshes=true Singles meshes are directly integrated into scene when loaded or later
  * @param {boolean} [requestTerminate=false] Request termination of web worker and free local resources after execution
  *
- * @returns {{modelName: string, dataAvailable: boolean, pathObj: null, fileObj: null, pathTexture: null, fileMtl: null, sceneGraphBaseNode: null, requestTerminate: boolean}}
+ * @returns {{modelName: string, dataAvailable: boolean, pathObj: null, fileObj: null, pathTexture: null, fileMtl: null, sceneGraphBaseNode: null, streamMeshes: boolean,  requestTerminate: boolean}}
  * @constructor
  */
-THREE.OBJLoader2.WWOBJLoader2.PrepDataFile = function ( modelName, pathObj, fileObj, pathTexture, fileMtl, sceneGraphBaseNode, requestTerminate ) {
+THREE.OBJLoader2.WWOBJLoader2.PrepDataFile = function ( modelName, pathObj, fileObj, pathTexture, fileMtl, sceneGraphBaseNode, streamMeshes, requestTerminate ) {
 
 	var data = {
 		modelName: ( modelName == null ) ? 'none' : modelName,
@@ -926,6 +953,7 @@ THREE.OBJLoader2.WWOBJLoader2.PrepDataFile = function ( modelName, pathObj, file
 		pathTexture: ( pathTexture == null ) ? null : pathTexture,
 		fileMtl: ( fileMtl == null ) ? null : fileMtl,
 		sceneGraphBaseNode: ( sceneGraphBaseNode == null ) ? null : sceneGraphBaseNode,
+		streamMeshes: ( streamMeshes == null ) ? true : streamMeshes,
 		requestTerminate: ( requestTerminate == null ) ? false : requestTerminate
 	};
 
